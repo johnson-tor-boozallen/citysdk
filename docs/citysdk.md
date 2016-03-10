@@ -124,6 +124,26 @@ Checks to see whether local storage is available
 
 **Returns**: `boolean`, true if storage type is available
 
+### CitySDK.ESRItoGEO(esriJSON) 
+
+Converts ESRI JSON to GeoJSON
+
+**Parameters**
+
+**esriJSON**: `string`, Converts ESRI JSON to GeoJSON
+
+**Returns**: `Object`
+
+### CitySDK.GEOtoESRI(geoJSON) 
+
+Converts geoJSON to ESRI JSONThis is functionally an alias of Terraformer.ArcGIS.convert (see https://github.com/Esri/Terraformer for details)
+
+**Parameters**
+
+**geoJSON**: `string`, Converts geoJSON to ESRI JSONThis is functionally an alias of Terraformer.ArcGIS.convert (see https://github.com/Esri/Terraformer for details)
+
+**Returns**: `object`
+
 
 
 * * *

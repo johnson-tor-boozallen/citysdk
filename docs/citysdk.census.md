@@ -66,6 +66,7 @@ Parses the state code in a request object, converting two letter state codes to 
 
 **request**: `object`, Object representing an api request
 
+**Returns**: `object`, returns the request Object with lat and lng populated
 
 ### CensusModule.parseRequestLatLng(request) 
 
@@ -78,35 +79,35 @@ Checks the request object for lat/lng latitude/longitude and x/y fields and move
 
 ### CensusModule.ESRItoGEO(esriJSON) 
 
-Converts ESRI JSON to GeoJSON
+Converts ESRI JSON to GeoJSONThis function has been moved to the CitySDK core. An alias remains here for legacy support.
 
 **Parameters**
 
-**esriJSON**: `string`, Converts ESRI JSON to GeoJSON
+**esriJSON**: `string`, Converts ESRI JSON to GeoJSONThis function has been moved to the CitySDK core. An alias remains here for legacy support.
 
 **Returns**: `Object`
 
 ### CensusModule.GEOtoESRI(geoJSON) 
 
-Converts geoJSON to ESRI JSONThis is functionally an alias of Terraformer.ArcGIS.convert (see https://github.com/Esri/Terraformer for details)
+Converts geoJSON to ESRI JSONThis function has been moved to the CitySDK core. An alias remains here for legacy support.
 
 **Parameters**
 
-**geoJSON**: `string`, Converts geoJSON to ESRI JSONThis is functionally an alias of Terraformer.ArcGIS.convert (see https://github.com/Esri/Terraformer for details)
+**geoJSON**: `string`, Converts geoJSON to ESRI JSONThis function has been moved to the CitySDK core. An alias remains here for legacy support.
 
 **Returns**: `object`
 
 ### CensusModule.getVariableDictionary(api, year, callback) 
 
-Downloads an ACS API's entire dictionary of variables from the Census
+Downloads an API's entire dictionary of variables from the Census
 
 **Parameters**
 
-**api**: `string`, Downloads an ACS API's entire dictionary of variables from the Census
+**api**: `string`, Downloads an API's entire dictionary of variables from the Census
 
-**year**: `string`, Downloads an ACS API's entire dictionary of variables from the Census
+**year**: `string`, Downloads an API's entire dictionary of variables from the Census
 
-**callback**: `function`, Downloads an ACS API's entire dictionary of variables from the Census
+**callback**: `function`, Downloads an API's entire dictionary of variables from the Census
 
 
 ### CensusModule.latLngToFIPS(lat, lng, callback) 
