@@ -31,7 +31,7 @@ CensusModule.prototype.DEFAULT_API = "acs5";
 CensusModule.prototype.DEFAULT_ENDPOINTS = {};
 CensusModule.prototype.DEFAULT_ENDPOINTS.acsVariableDictionaryURL = "//api.census.gov/data/";
 CensusModule.prototype.DEFAULT_ENDPOINTS.geocoderURL = "//geocoding.geo.census.gov/geocoder/geographies/";
-CensusModule.prototype.DEFAULT_ENDPOINTS.tigerwebURL = "//tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/";
+CensusModule.prototype.DEFAULT_ENDPOINTS.tigerwebURL = "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/";
 CensusModule.prototype.DEFAULT_ENDPOINTS.censusURL = "//api.census.gov/data/";
 
 
@@ -801,7 +801,7 @@ CensusModule.prototype.tigerwebRequest = function (request, callback) {
                     return;
                 } else {
 
-                    CitySDK.prototype.sdkInstance.ajaxRequest(tigerURLReq, tigerRequestSubmitted).done(
+                    CitySDK.prototype.sdkInstance.postRequest(tigerURLReq, tigerRequestSubmitted).done(
                         function (response) {
                             var json = jQuery.parseJSON(response);
                             var features = json.features;
@@ -836,7 +836,7 @@ CensusModule.prototype.tigerwebRequest = function (request, callback) {
                     callback(CitySDK.prototype.sdkInstance.modules.census.ESRItoGEO(cachedData));
                     return;
                 } else {
-                    CitySDK.prototype.sdkInstance.ajaxRequest(tigerURLReq, tigerRequestSubmitted).done(function (response) {
+                    CitySDK.prototype.sdkInstance.postRequest(tigerURLReq, tigerRequestSubmitted).done(function (response) {
                             CitySDK.prototype.sdkInstance.setCachedData("census", "tigerwebRequest", cacheKey, response);
                             callback(CitySDK.prototype.sdkInstance.modules.census.ESRItoGEO(response));
                         });
@@ -891,7 +891,7 @@ CensusModule.prototype.tigerwebRequest = function (request, callback) {
                 callback(CitySDK.prototype.sdkInstance.modules.census.ESRItoGEO(cachedData));
                 return;
             } else {
-                CitySDK.prototype.sdkInstance.ajaxRequest(tigerURLReq, tigerRequestSubmitted).done(
+                CitySDK.prototype.sdkInstance.postRequest(tigerURLReq, tigerRequestSubmitted).done(
                     function (response) {
                         CitySDK.prototype.sdkInstance.setCachedData("census", "tigerwebRequest", cacheKey, response);
 
