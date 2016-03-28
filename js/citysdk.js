@@ -5,488 +5,499 @@
  */
 
 
-//SDK instance for the callback functions
-CitySDK.prototype.sdkInstance = null;
 
 
-/**
- * Instantiates an instance of the CitySDK object.
- * @constructor
- */
-function CitySDK() {
-    CitySDK.prototype.sdkInstance = this;
 
-    var idbSupported = false;
+(function() {
+    var CitySDK = (function() {
+        var CitySDK = function() {
+            CitySDK.prototype.sdkInstance = this;
 
+            var idbSupported = false;
 
-    // Initialize Cache System
-    if ("indexedDB" in window) {
-        // browser support of indexedDB is present
-        idbSupported = true;
-    } else {
-        // Disable cache due to lack of browser support
-        this.allowCache = false;
-    }
+            // Initialize Cache System
+            if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+                // Disable Cache when using NodeJS (Temporary Measure)
+                this.allowCache = false;
 
-    if (idbSupported && this.allowCache == true) {
-        var openRequest = indexedDB.open("CitySDKdb", 1);
-
-        openRequest.onupgradeneeded = function (e) {
-            CitySDK.prototype.CitySDKdb = e.target.result;
-
-            if (!CitySDK.prototype.CitySDKdb.objectStoreNames.contains("citySDKCache")) {
-                var objectStore = CitySDK.prototype.CitySDKdb.createObjectStore("citySDKCache", {autoIncrement: true});
-                objectStore.createIndex("cacheKeys", ["module", "functionName", "hashKey"], {unique: false});
+            } else if ("indexedDB" in window) {
+                // browser support of indexedDB is present
+                idbSupported = true;
+            } else {
+                // Disable cache due to lack of browser support
+                this.allowCache = false;
             }
 
-        }
+            if (idbSupported && this.allowCache == true) {
+                var openRequest = indexedDB.open("CitySDKdb", 1);
 
-        openRequest.onsuccess = function (e) {
-            CitySDK.prototype.CitySDKdb = e.target.result;
-        }
+                openRequest.onupgradeneeded = function (e) {
+                    CitySDK.prototype.CitySDKdb = e.target.result;
 
-        openRequest.onerror = function (e) {
-            console.log("Error");
-            console.dir(e);
-        }
+                    if (!CitySDK.prototype.CitySDKdb.objectStoreNames.contains("citySDKCache")) {
+                        var objectStore = CitySDK.prototype.CitySDKdb.createObjectStore("citySDKCache", {autoIncrement: true});
+                        objectStore.createIndex("cacheKeys", ["module", "functionName", "hashKey"], {unique: false});
+                    }
 
-    }
+                }
 
-}
+                openRequest.onsuccess = function (e) {
+                    CitySDK.prototype.CitySDKdb = e.target.result;
+                }
+
+                openRequest.onerror = function (e) {
+                    console.log("Error");
+                    console.dir(e);
+                }
+
+            }
+
+        };
+
+        /**
+         * Instantiates an instance of the CitySDK object.
+         * @constructor
+         */
+
+        //SDK instance for the callback functions
+        CitySDK.prototype.sdkInstance = null;
+
+        //Settings
+        /**
+         * Version number of the CitySDK Core
+         */
+        CitySDK.prototype.version = 1.5;
+
+        /**
+         * Toggles whether CitySDK will attempt to cache data to reduce the API call requirements
+         */
+        CitySDK.prototype.allowCache = true;
+        CitySDK.prototype.CitySDKdb;
+
+        /**
+         * Stores each module
+         * @type {object}
+         */
+        CitySDK.prototype.modules = {};
+
+        /**
+         * Makes an AJAX call
+         * @param {string} url URL to request
+         * @return {promise} Returns a standard ajax promise
+         */
+        CitySDK.prototype.ajaxRequest = function (url) {
+            return jQuery.ajax({
+                type: 'GET',
+                dataType: 'text',
+                contentType: 'text/plain',
+                url: url
+            });
+        };
+
+        /**
+         * Makes an AJAX call (using jsonp)
+         * @param {string} url URL to request
+         * @return {object} Returns a standard ajax promise
+         */
+        CitySDK.prototype.jsonpRequest = function (url) {
+            return jQuery.ajax({
+                type: 'GET',
+                dataType: "jsonp",
+                contentType: 'text/plain',
+                url: url
+            });
+        };
+
+        /**
+         * Make an AJAX call (using POST)
+         * @param {string} url
+         * @param {object} data
+         * @returns {*}
+         */
+        CitySDK.prototype.postRequest = function (url, data) {
+            return jQuery.ajax({
+                type: "POST",
+                url: url,
+                data: data,
+                dataType: "text"
+            });
+        };
 
 
-//Settings
-/**
- * Version number of the CitySDK Core
- */
-CitySDK.prototype.version = 1.5;
-
-/**
- * Toggles whether CitySDK will attempt to cache data to reduce the API call requirements
- */
-CitySDK.prototype.allowCache = true;
-CitySDK.prototype.CitySDKdb;
+        // General cross-module utility functions
 
 
+        /**
+         * Returns a list of state names keyed by 2-leter code
+         * @return {object} state names keyed by 2-leter code
+         */
+        CitySDK.prototype.stateNames = function () {
+            var theStates = {
+                "AL": "alabama",
+                "AK": "alaska",
+                "AZ": "arizona",
+                "AR": "arkansas",
+                "CA": "california",
+                "CO": "colorado",
+                "CT": "connecticut",
+                "DE": "delaware",
+                "DC": "district of columbia",
+                "FL": "florida",
+                "GA": "georgia",
+                "HI": "hawaii",
+                "ID": "idaho",
+                "IL": "illinois",
+                "IN": "indiana",
+                "IA": "iowa",
+                "KS": "kansas",
+                "KY": "kentucky",
+                "LA": "louisiana",
+                "ME": "maine",
+                "MD": "maryland",
+                "MA": "massachusetts",
+                "MI": "michigan",
+                "MN": "minnesota",
+                "MS": "mississippi",
+                "MO": "missouri",
+                "MT": "montana",
+                "NE": "nebraska",
+                "NV": "nevada",
+                "NH": "new hampshire",
+                "NJ": "new jersey",
+                "NM": "new mexico",
+                "NY": "new york",
+                "NC": "north carolina",
+                "ND": "north dakota",
+                "OH": "ohio",
+                "OK": "oklahoma",
+                "OR": "oregon",
+                "PA": "pennsylvania",
+                "RI": "rhode island",
+                "SC": "south carolina",
+                "SD": "south dakota",
+                "TN": "tennessee",
+                "TX": "texas",
+                "UT": "utah",
+                "VT": "vermont",
+                "VA": "virginia",
+                "WA": "washington",
+                "WV": "west virginia",
+                "WI": "wisconsin",
+                "WY": "wyoming"
+            };
+            return theStates;
 
+        };
 
-/**
- * Stores each module
- * @type {object}
- */
-CitySDK.prototype.modules = {};
+        /**
+         * Returns a Lat & Long of each state's capital
+         * @return {object} arrays of Lat & Long of each state's capital keyed by 2-leter code
+         */
+        CitySDK.prototype.stateCapitals = function () {
 
+            var theCapitals = {
+                "AL": [32.3617, -86.2792],
+                "AK": [58.3, -134.4167],
+                "AZ": [33.45, -112.0667],
+                "AR": [34.6361, -92.3311],
+                "CA": [38.5766, -121.4934],
+                "CO": [39.7391, -104.9849],
+                "CT": [41.7641, -72.6828],
+                "DE": [39.1619, -75.5267],
+                "DC": [38.9047, -77.0164],
+                "FL": [30.4381, -84.2816],
+                "GA": [33.7493, -84.3883],
+                "HI": [21.3073, -157.8573],
+                "ID": [43.6177, -116.1996],
+                "IL": [39.7983, -89.6544],
+                "IN": [39.7686, -86.1625],
+                "IA": [41.5912, -93.6039],
+                "KS": [39.0481, -95.6781],
+                "KY": [38.1867, -84.8753],
+                "LA": [30.4571, -91.1874],
+                "ME": [44.3235, -69.7653],
+                "MD": [38.9786, -76.4911],
+                "MA": [42.3582, -71.0637],
+                "MI": [42.7337, -84.5556],
+                "MN": [44.9553, -93.1022],
+                "MS": [32.2992, -90.1800],
+                "MO": [38.5791, -92.1730],
+                "MT": [46.5958, -112.0270],
+                "NE": [40.8106, -96.6803],
+                "NV": [39.1608, -119.7539],
+                "NH": [43.2067, -71.5381],
+                "NJ": [40.2237, -74.7640],
+                "NM": [35.6672, -105.9644],
+                "NY": [42.6525, -73.7572],
+                "NC": [35.7806, -78.6389],
+                "ND": [46.8133, -100.7790],
+                "OH": [39.9833, -82.9833],
+                "OK": [35.4822, -97.5350],
+                "OR": [44.9308, -123.0289],
+                "PA": [40.2697, -76.8756],
+                "RI": [41.8236, -71.4222],
+                "SC": [34.0298, -80.8966],
+                "SD": [44.3680, -100.3364],
+                "TN": [36.1667, -86.7833],
+                "TX": [30.2500, -97.7500],
+                "UT": [40.7500, -111.8833],
+                "VT": [44.2500, -72.5667],
+                "VA": [37.5333, -77.4667],
+                "WA": [47.0425, -122.8931],
+                "WV": [38.3472, -81.6333],
+                "WI": [43.0667, -89.4000],
+                "WY": [41.1456, -104.8019]
+            };
+            return theCapitals;
+        };
 
-// Polyfills
-if (!Array.isArray) {
-    Array.isArray = function (arg) {
-        return Object.prototype.toString.call(arg) === '[object Array]';
-    };
-}
+        /**
+         * Gets the coordinates of a state's capital from it's name or 2-letter code.
+         * @param {string} stateString Name or 2-letter code of the state (case insensitive)
+         * @return {array} Returns 2-position array of Lat & Long for the capital of the state. Returns false if no state is found.
+         */
+        CitySDK.prototype.getStateCapitalCoords = function (stateString) {
+            // No string supplied
+            if (typeof stateString == undefined) {
+                return false;
+            }
+            if (stateString == "" || stateString == null) {
+                return false;
+            }
 
+            stateString = stateString.toUpperCase().trim();
+            var stateCapitals = this.stateCapitals();
+            if (stateString in stateCapitals) {
+                // stateString is a 2-letter state code and is valid
+                return stateCapitals[stateString];
+            }
+            // Look in state names
+            stateString = stateString.toLowerCase();
 
-/**
- * Makes an AJAX call
- * @param {string} url URL to request
- * @return {promise} Returns a standard ajax promise
- */
-CitySDK.prototype.ajaxRequest = function (url) {
-    return jQuery.ajax({
-        type: 'GET',
-        dataType: 'text',
-        contentType: 'text/plain',
-        url: url
-    });
-};
+            var stateNames = this.stateNames();
+            for (var i in stateNames) {
+                if (stateString == stateNames[i]) {
+                    return stateCapitals[i];
+                }
+            }
 
-/**
- * Makes an AJAX call (using jsonp)
- * @param {string} url URL to request
- * @return {object} Returns a standard ajax promise
- */
-CitySDK.prototype.jsonpRequest = function (url) {
-    return jQuery.ajax({
-        type: 'GET',
-        dataType: "jsonp",
-        contentType: 'text/plain',
-        url: url
-    });
-};
-
-/**
- * Make an AJAX call (using POST)
- * @param {string} url
- * @param {object} data
- * @returns {*}
- */
-CitySDK.prototype.postRequest = function (url, data) {
-    return jQuery.ajax({
-        type: "POST",
-        url: url,
-        data: data,
-        dataType: "text"
-    });
-};
-
-
-// General cross-module utility functions
-
-
-/**
- * Returns a list of state names keyed by 2-leter code
- * @return {object} state names keyed by 2-leter code
- */
-CitySDK.prototype.stateNames = function () {
-    var theStates = {
-        "AL": "alabama",
-        "AK": "alaska",
-        "AZ": "arizona",
-        "AR": "arkansas",
-        "CA": "california",
-        "CO": "colorado",
-        "CT": "connecticut",
-        "DE": "delaware",
-        "DC": "district of columbia",
-        "FL": "florida",
-        "GA": "georgia",
-        "HI": "hawaii",
-        "ID": "idaho",
-        "IL": "illinois",
-        "IN": "indiana",
-        "IA": "iowa",
-        "KS": "kansas",
-        "KY": "kentucky",
-        "LA": "louisiana",
-        "ME": "maine",
-        "MD": "maryland",
-        "MA": "massachusetts",
-        "MI": "michigan",
-        "MN": "minnesota",
-        "MS": "mississippi",
-        "MO": "missouri",
-        "MT": "montana",
-        "NE": "nebraska",
-        "NV": "nevada",
-        "NH": "new hampshire",
-        "NJ": "new jersey",
-        "NM": "new mexico",
-        "NY": "new york",
-        "NC": "north carolina",
-        "ND": "north dakota",
-        "OH": "ohio",
-        "OK": "oklahoma",
-        "OR": "oregon",
-        "PA": "pennsylvania",
-        "RI": "rhode island",
-        "SC": "south carolina",
-        "SD": "south dakota",
-        "TN": "tennessee",
-        "TX": "texas",
-        "UT": "utah",
-        "VT": "vermont",
-        "VA": "virginia",
-        "WA": "washington",
-        "WV": "west virginia",
-        "WI": "wisconsin",
-        "WY": "wyoming"
-    };
-    return theStates;
-
-};
-
-/**
- * Returns a Lat & Long of each state's capital
- * @return {object} arrays of Lat & Long of each state's capital keyed by 2-leter code
- */
-CitySDK.prototype.stateCapitals = function () {
-
-    var theCapitals = {
-        "AL": [32.3617, -86.2792],
-        "AK": [58.3, -134.4167],
-        "AZ": [33.45, -112.0667],
-        "AR": [34.6361, -92.3311],
-        "CA": [38.5766, -121.4934],
-        "CO": [39.7391, -104.9849],
-        "CT": [41.7641, -72.6828],
-        "DE": [39.1619, -75.5267],
-        "DC": [38.9047, -77.0164],
-        "FL": [30.4381, -84.2816],
-        "GA": [33.7493, -84.3883],
-        "HI": [21.3073, -157.8573],
-        "ID": [43.6177, -116.1996],
-        "IL": [39.7983, -89.6544],
-        "IN": [39.7686, -86.1625],
-        "IA": [41.5912, -93.6039],
-        "KS": [39.0481, -95.6781],
-        "KY": [38.1867, -84.8753],
-        "LA": [30.4571, -91.1874],
-        "ME": [44.3235, -69.7653],
-        "MD": [38.9786, -76.4911],
-        "MA": [42.3582, -71.0637],
-        "MI": [42.7337, -84.5556],
-        "MN": [44.9553, -93.1022],
-        "MS": [32.2992, -90.1800],
-        "MO": [38.5791, -92.1730],
-        "MT": [46.5958, -112.0270],
-        "NE": [40.8106, -96.6803],
-        "NV": [39.1608, -119.7539],
-        "NH": [43.2067, -71.5381],
-        "NJ": [40.2237, -74.7640],
-        "NM": [35.6672, -105.9644],
-        "NY": [42.6525, -73.7572],
-        "NC": [35.7806, -78.6389],
-        "ND": [46.8133, -100.7790],
-        "OH": [39.9833, -82.9833],
-        "OK": [35.4822, -97.5350],
-        "OR": [44.9308, -123.0289],
-        "PA": [40.2697, -76.8756],
-        "RI": [41.8236, -71.4222],
-        "SC": [34.0298, -80.8966],
-        "SD": [44.3680, -100.3364],
-        "TN": [36.1667, -86.7833],
-        "TX": [30.2500, -97.7500],
-        "UT": [40.7500, -111.8833],
-        "VT": [44.2500, -72.5667],
-        "VA": [37.5333, -77.4667],
-        "WA": [47.0425, -122.8931],
-        "WV": [38.3472, -81.6333],
-        "WI": [43.0667, -89.4000],
-        "WY": [41.1456, -104.8019]
-    };
-    return theCapitals;
-};
-
-/**
- * Gets the coordinates of a state's capital from it's name or 2-letter code.
- * @param {string} stateString Name or 2-letter code of the state (case insensitive)
- * @return {array} Returns 2-position array of Lat & Long for the capital of the state. Returns false if no state is found.
- */
-CitySDK.prototype.getStateCapitalCoords = function (stateString) {
-    // No string supplied
-    if (typeof stateString == undefined) {
-        return false;
-    }
-    if (stateString == "" || stateString == null) {
-        return false;
-    }
-
-    stateString = stateString.toUpperCase().trim();
-    var stateCapitals = this.stateCapitals();
-    if (stateString in stateCapitals) {
-        // stateString is a 2-letter state code and is valid
-        return stateCapitals[stateString];
-    }
-    // Look in state names
-    stateString = stateString.toLowerCase();
-
-    var stateNames = this.stateNames();
-    for (var i in stateNames) {
-        if (stateString == stateNames[i]) {
-            return stateCapitals[i];
-        }
-    }
-
-    //Nothing was found
-    return false;
-};// end getStateCapitalCoords()
+            //Nothing was found
+            return false;
+        };// end getStateCapitalCoords()
 
 
 //Check if we have latitude and longitude in the request
-/**
- * Scans the request for alternative ways to specify latitude & longiture and migrates those variables to lat & lng positions.
- * @param {object} request the request being made to the module
- * @return {object} the updated request
- */
-CitySDK.prototype.parseRequestLatLng = function (request) {
-    //Allow the users to use either x,y; lat,lng; latitude,longitude to specify co-ordinates
-    if (!("lat" in request)) {
-        if ("latitude" in request) {
-            request.lat = request.latitude;
-            delete request.latitude;
-        } else if ("y" in request) {
-            request.lat = request.y;
-            delete request.y;
-        }
-    }
+        /**
+         * Scans the request for alternative ways to specify latitude & longiture and migrates those variables to lat & lng positions.
+         * @param {object} request the request being made to the module
+         * @return {object} the updated request
+         */
+        CitySDK.prototype.parseRequestLatLng = function (request) {
+            //Allow the users to use either x,y; lat,lng; latitude,longitude to specify co-ordinates
+            if (!("lat" in request)) {
+                if ("latitude" in request) {
+                    request.lat = request.latitude;
+                    delete request.latitude;
+                } else if ("y" in request) {
+                    request.lat = request.y;
+                    delete request.y;
+                }
+            }
 
-    if (!("lng" in request)) {
-        if ("longitude" in request) {
-            request.lng = request.longitude;
-            delete request.longitude;
-        } else if ("x" in request) {
-            request.lng = request.x;
-            delete request.x;
-        }
-    }
+            if (!("lng" in request)) {
+                if ("longitude" in request) {
+                    request.lng = request.longitude;
+                    delete request.longitude;
+                } else if ("x" in request) {
+                    request.lng = request.x;
+                    delete request.x;
+                }
+            }
 
-    return request;
-};
+            return request;
+        };
 
 
 // Caching Systems
 
-/**
- * Retrieves a value from the cache
- * @param {string} module name of the CitySDK module
- * @param {string} hashKey this is a key that identifies the data. Each module has its own hashing scheme.
- * @return {object} the value of the cached data.  Returns false if nothing found
- */
-CitySDK.prototype.getCachedData = function (module, functionName, hashKey, callback) {
-    if (typeof module == "undefined" || typeof hashKey == "undefined" || module == "" || hashKey == "" || CitySDK.prototype.sdkInstance.allowCache == false) {
-       callback(null);
-        return false;
-    }
+        /**
+         * Retrieves a value from the cache
+         * @param {string} module name of the CitySDK module
+         * @param {string} hashKey this is a key that identifies the data. Each module has its own hashing scheme.
+         * @return {object} the value of the cached data.  Returns false if nothing found
+         */
+        CitySDK.prototype.getCachedData = function (module, functionName, hashKey, callback) {
+            if (typeof module == "undefined" || typeof hashKey == "undefined" || module == "" || hashKey == "" || CitySDK.prototype.sdkInstance.allowCache == false) {
+                callback(null);
+                return false;
+            }
 
 
-    var openRequest = indexedDB.open("CitySDKdb", 1);
+            var openRequest = indexedDB.open("CitySDKdb", 1);
 
-    openRequest.onsuccess = function (e) {
-        CitySDK.prototype.CitySDKdb = e.target.result;
+            openRequest.onsuccess = function (e) {
+                CitySDK.prototype.CitySDKdb = e.target.result;
 
 
 
-        // In your query section
-        var transaction = CitySDK.prototype.CitySDKdb.transaction(["citySDKCache"], 'readonly');
-        var store = transaction.objectStore('citySDKCache');
-        var index = store.index('cacheKeys');
-        // Select the first matching record
-        var request = index.get(IDBKeyRange.only([module, functionName, hashKey]));
+                // In your query section
+                var transaction = CitySDK.prototype.CitySDKdb.transaction(["citySDKCache"], 'readonly');
+                var store = transaction.objectStore('citySDKCache');
+                var index = store.index('cacheKeys');
+                // Select the first matching record
+                var request = index.get(IDBKeyRange.only([module, functionName, hashKey]));
 
-        request.onerror = function (event) {
-            return null;
-        };
-        request.onsuccess = function (e) {
+                request.onerror = function (event) {
+                    return null;
+                };
+                request.onsuccess = function (e) {
 
-            var result = e.target.result;
-            if (result) {
-                //console.log(result.data[0]);
-                if (typeof callback != 'undefined' && typeof callback == 'function') {
-                    callback(result.data);
+                    var result = e.target.result;
+                    if (result) {
+                        //console.log(result.data[0]);
+                        if (typeof callback != 'undefined' && typeof callback == 'function') {
+                            callback(result.data);
+                        }
+                        return result.data;
+                    } else {
+                        if (typeof callback != 'undefined' && typeof callback == 'function') {
+                            callback(null);
+                        }
+                        return null;
+                    }
                 }
-                return result.data;
-            } else {
-                if (typeof callback != 'undefined' && typeof callback == 'function') {
-                    callback(null);
-                }
-                return null;
+
+
+            }
+
+
+
+
+        }//getCachedDate
+
+        /**
+         * Creates and/or Updates a value from the cache
+         * @param {string} module name of the CitySDK module
+         * @param {string} hashKey this is a key that identifies the data. Each module has its own hashing scheme.
+         * @param {object} dataValue this is the data being stored.  It should be an object that contains both the specific data and any meta information needed to invalidate it.
+         * @return {object} the value of the cached data.  Returns false if nothing found
+         */
+        CitySDK.prototype.setCachedData = function (module, functionName, hashKey, dataValue) {
+            if (typeof module == "undefined" || typeof hashKey == "undefined" || typeof functionName == "undefined" || typeof dataValue == "undefined" || dataValue == "" || module == "" || hashKey == "" || CitySDK.prototype.sdkInstance.allowCache == false) {
+                return false;
+            }
+
+            // CitySDKdb CitySDKdb citySDKCache
+            var storeData = {"module": module, "functionName": functionName, "hashKey": hashKey, "data": dataValue}
+            var openRequest = indexedDB.open("CitySDKdb", 1);
+
+            openRequest.onsuccess = function (e) {
+                CitySDK.prototype.CitySDKdb = e.target.result;
+                var transaction = CitySDK.prototype.CitySDKdb.transaction(["citySDKCache"], "readwrite");
+                var store = transaction.objectStore("citySDKCache");
+                var request = store.add(storeData);
+            }
+
+
+
+            return true;
+        }//setCachedData
+
+
+        /**
+         * Deletes a value from the cache
+         * @param {string} module name of the CitySDK module
+         * @param {string} hashKey this is a key that identifies the data. Each module has its own hashing scheme.
+         * @return {object} the value of the cached data.  Returns false if nothing found
+         */
+        CitySDK.prototype.deleteCachedData = function (module, functionName, hashKey) {
+            if (typeof module == "undefined" || typeof hashKey == "undefined" || module == "" || hashKey == "" || CitySDK.prototype.sdkInstance.allowCache == false) {
+                return false;
+            }
+
+// CitySDKdb CitySDKdb citySDKCache
+            var storeData = {"module": module, "functionName": functionName, "hashKey": hashKey}
+            var openRequest = indexedDB.open("CitySDKdb", 1);
+
+            openRequest.onsuccess = function (e) {
+                CitySDK.prototype.CitySDKdb = e.target.result;
+                var transaction = CitySDK.prototype.CitySDKdb.transaction(["citySDKCache"], "readwrite");
+                var store = transaction.objectStore("citySDKCache");
+                var request = store.delete(IDBKeyRange.only([module, functionName, hashKey]));
+            }
+            return true;
+        }//deleteCachedData
+
+
+        /**
+         * Checks to see whether local storage is available
+         * @param {string} type the tyoe fo storage being tested. Generally 'localstorage' is used.
+         * @return {boolean} true if storage type is available
+         */
+        CitySDK.prototype.storageAvailable = function (type) {
+            try {
+                var storage = window[type],
+                    x = '__storage_test__';
+                storage.setItem(x, x);
+                storage.removeItem(x);
+                return true;
+            }
+            catch (e) {
+                return false;
             }
         }
 
+        /**
+         * Converts ESRI JSON to GeoJSON
+         * @param {string} esriJSON
+         * @returns {{type: string, features: Array}}
+         */
+        CitySDK.prototype.ESRItoGEO = function (esriJSON) {
+            var json = jQuery.parseJSON(esriJSON);
+            if(!("features" in json)){
+                // data is missing
+                return false;
+            }
+            var features = json.features;
 
-    }
+            var geojson = {
+                "type": "FeatureCollection",
+                "features": []
+            };
 
+            for (var i = 0; i < features.length; i++) {
+                features[i].spatialReference = json.spatialReference;
+                geojson.features.push(Terraformer.ArcGIS.parse(features[i]));
+            }
 
+            return geojson;
+        };
 
-
-}//getCachedDate
-
-/**
- * Creates and/or Updates a value from the cache
- * @param {string} module name of the CitySDK module
- * @param {string} hashKey this is a key that identifies the data. Each module has its own hashing scheme.
- * @param {object} dataValue this is the data being stored.  It should be an object that contains both the specific data and any meta information needed to invalidate it.
- * @return {object} the value of the cached data.  Returns false if nothing found
- */
-CitySDK.prototype.setCachedData = function (module, functionName, hashKey, dataValue) {
-    if (typeof module == "undefined" || typeof hashKey == "undefined" || typeof functionName == "undefined" || typeof dataValue == "undefined" || dataValue == "" || module == "" || hashKey == "" || CitySDK.prototype.sdkInstance.allowCache == false) {
-        return false;
-    }
-
-    // CitySDKdb CitySDKdb citySDKCache
-    var storeData = {"module": module, "functionName": functionName, "hashKey": hashKey, "data": dataValue}
-    var openRequest = indexedDB.open("CitySDKdb", 1);
-
-    openRequest.onsuccess = function (e) {
-        CitySDK.prototype.CitySDKdb = e.target.result;
-        var transaction = CitySDK.prototype.CitySDKdb.transaction(["citySDKCache"], "readwrite");
-        var store = transaction.objectStore("citySDKCache");
-        var request = store.add(storeData);
-    }
-
-
-
-    return true;
-}//setCachedData
-
-
-/**
- * Deletes a value from the cache
- * @param {string} module name of the CitySDK module
- * @param {string} hashKey this is a key that identifies the data. Each module has its own hashing scheme.
- * @return {object} the value of the cached data.  Returns false if nothing found
- */
-CitySDK.prototype.deleteCachedData = function (module, functionName, hashKey) {
-    if (typeof module == "undefined" || typeof hashKey == "undefined" || module == "" || hashKey == "" || CitySDK.prototype.sdkInstance.allowCache == false) {
-        return false;
-    }
-
-// CitySDKdb CitySDKdb citySDKCache
-    var storeData = {"module": module, "functionName": functionName, "hashKey": hashKey}
-    var openRequest = indexedDB.open("CitySDKdb", 1);
-
-    openRequest.onsuccess = function (e) {
-        CitySDK.prototype.CitySDKdb = e.target.result;
-        var transaction = CitySDK.prototype.CitySDKdb.transaction(["citySDKCache"], "readwrite");
-        var store = transaction.objectStore("citySDKCache");
-        var request = store.delete(IDBKeyRange.only([module, functionName, hashKey]));
-    }
-    return true;
-}//deleteCachedData
+        /**
+         * Converts geoJSON to ESRI JSON
+         * This is functionally an alias of Terraformer.ArcGIS.convert (see https://github.com/Esri/Terraformer for details)
+         * @param {string} geoJSON
+         * @returns {object}
+         */
+        CitySDK.prototype.GEOtoESRI = function (geoJSON) {
+            return Terraformer.ArcGIS.convert(geoJSON);
+        };
 
 
-/**
- * Checks to see whether local storage is available
- * @param {string} type the tyoe fo storage being tested. Generally 'localstorage' is used.
- * @return {boolean} true if storage type is available
- */
-CitySDK.prototype.storageAvailable = function (type) {
-    try {
-        var storage = window[type],
-            x = '__storage_test__';
-        storage.setItem(x, x);
-        storage.removeItem(x);
-        return true;
-    }
-    catch (e) {
-        return false;
-    }
-}
 
-/**
- * Converts ESRI JSON to GeoJSON
- * @param {string} esriJSON
- * @returns {{type: string, features: Array}}
- */
-CitySDK.prototype.ESRItoGEO = function (esriJSON) {
-    var json = jQuery.parseJSON(esriJSON);
-    if(!("features" in json)){
-        // data is missing
-        return false;
-    }
-    var features = json.features;
 
-    var geojson = {
-        "type": "FeatureCollection",
-        "features": []
-    };
 
-    for (var i = 0; i < features.length; i++) {
-        features[i].spatialReference = json.spatialReference;
-        geojson.features.push(Terraformer.ArcGIS.parse(features[i]));
-    }
+        return CitySDK;
+    })();
 
-    return geojson;
-};
+    if (typeof module !== 'undefined')
+        module.exports = {CitySDK: CitySDK};
+    else
+        window.CitySDK = CitySDK;
+})();
 
-/**
- * Converts geoJSON to ESRI JSON
- * This is functionally an alias of Terraformer.ArcGIS.convert (see https://github.com/Esri/Terraformer for details)
- * @param {string} geoJSON
- * @returns {object}
- */
-CitySDK.prototype.GEOtoESRI = function (geoJSON) {
-    return Terraformer.ArcGIS.convert(geoJSON);
-};
+
+
 
 
 
@@ -496,6 +507,11 @@ CitySDK.prototype.GEOtoESRI = function (geoJSON) {
  * Census GeoRequest
  */
 
+
+/* NodeJS will depend on Terraformer node module */
+
+if (typeof module == 'undefined'){
+
 /*! Terraformer JS - 1.0.5 - 2015-01-29
  *   https://github.com/esri/Terraformer
  *   Copyright (c) 2015 Environmental Systems Research Institute, Inc.
@@ -504,3 +520,16 @@ CitySDK.prototype.GEOtoESRI = function (geoJSON) {
  *   https://github.com/esri/terraformer-arcgis-parser
  *   Copyright (c) 2014 Esri, Inc.
  *   Licensed MIT */!function(a,b){if("object"==typeof module&&"object"==typeof module.exports&&(exports=module.exports=b(require("terraformer"))),"object"==typeof a.navigator){if(!a.Terraformer)throw new Error("Terraformer.ArcGIS requires the core Terraformer library. https://github.com/esri/Terraformer");a.Terraformer.ArcGIS=b(a.Terraformer)}}(this,function(a){function b(a){var b,c,d,e,f=0,g=0,h=[];d=a.match(/((\+|\-)[^\+\-]+)/g),e=parseInt(d[0],32);for(var i=1;i<d.length;i+=2)b=parseInt(d[i],32)+f,f=b,c=parseInt(d[i+1],32)+g,g=c,h.push([b/e,c/e]);return h}function c(a){return d(a[0],a[a.length-1])||a.push(a[0]),a}function d(a,b){for(var c=0;c<a.length;c++)if(a[c]!==b[c])return!1;return!0}function e(a){var b={};for(var c in a)a.hasOwnProperty(c)&&(b[c]=a[c]);return b}function f(a){var b,c=0,d=0,e=a.length,f=a[d];for(d;e-1>d;d++)b=a[d+1],c+=(b[0]-f[0])*(b[1]+f[1]),f=b;return c>=0}function g(a){var b=[],d=a.slice(0),e=c(d.shift().slice(0));if(e.length>=4){f(e)||e.reverse(),b.push(e);for(var g=0;g<d.length;g++){var h=c(d[g].slice(0));h.length>=4&&(f(h)&&h.reverse(),b.push(h))}}return b}function h(a){for(var b=[],c=0;c<a.length;c++)for(var d=g(a[c]),e=d.length-1;e>=0;e--){var f=d[e].slice(0);b.push(f)}return b}function i(b,c){var d=a.Tools.arraysIntersectArrays(b,c),e=a.Tools.coordinatesContainPoint(b,c[0]);return!d&&e?!0:!1}function j(a){for(var b=[],d=[],e=0;e<a.length;e++){var g=c(a[e].slice(0));if(!(g.length<4))if(f(g)){var h=[g];b.push(h)}else d.push(g)}for(;d.length;){for(var j=d.pop(),k=!1,l=b.length-1;l>=0;l--){var m=b[l][0];if(i(m,j)){b[l].push(j),k=!0;break}}k||b.push([j.reverse()])}return 1===b.length?{type:"Polygon",coordinates:b[0]}:{type:"MultiPolygon",coordinates:b}}function k(c,d){var f={};d=d||{},d.idAttribute=d.idAttribute||void 0,"number"==typeof c.x&&"number"==typeof c.y&&(f.type="Point",f.coordinates=[c.x,c.y],(c.z||c.m)&&f.coordinates.push(c.z),c.m&&f.coordinates.push(c.m)),c.points&&(f.type="MultiPoint",f.coordinates=c.points.slice(0)),c.paths&&(1===c.paths.length?(f.type="LineString",f.coordinates=c.paths[0].slice(0)):(f.type="MultiLineString",f.coordinates=c.paths.slice(0))),c.rings&&(f=j(c.rings.slice(0))),(c.compressedGeometry||c.geometry||c.attributes)&&(f.type="Feature",c.compressedGeometry&&(c.geometry={paths:[b(c.compressedGeometry)]}),f.geometry=c.geometry?k(c.geometry):null,f.properties=c.attributes?e(c.attributes):null,c.attributes&&(f.id=c.attributes[d.idAttribute]||c.attributes.OBJECTID||c.attributes.FID));var g=c.geometry?c.geometry.spatialReference:c.spatialReference;return g&&102100===g.wkid&&(f=a.toGeographic(f)),new a.Primitive(f)}function l(b,c){var d;c=c||{};var f=c.idAttribute||"OBJECTID";d=c.sr?{wkid:c.sr}:b&&b.crs===a.MercatorCRS?{wkid:102100}:{wkid:4326};var i,j={};switch(b.type){case"Point":j.x=b.coordinates[0],j.y=b.coordinates[1],b.coordinates[2]&&(j.z=b.coordinates[2]),b.coordinates[3]&&(j.m=b.coordinates[3]),j.spatialReference=d;break;case"MultiPoint":j.points=b.coordinates.slice(0),j.spatialReference=d;break;case"LineString":j.paths=[b.coordinates.slice(0)],j.spatialReference=d;break;case"MultiLineString":j.paths=b.coordinates.slice(0),j.spatialReference=d;break;case"Polygon":j.rings=g(b.coordinates.slice(0)),j.spatialReference=d;break;case"MultiPolygon":j.rings=h(b.coordinates.slice(0)),j.spatialReference=d;break;case"Feature":b.geometry&&(j.geometry=l(b.geometry,c)),j.attributes=b.properties?e(b.properties):{},j.attributes[f]=b.id;break;case"FeatureCollection":for(j=[],i=0;i<b.features.length;i++)j.push(l(b.features[i],c));break;case"GeometryCollection":for(j=[],i=0;i<b.geometries.length;i++)j.push(l(b.geometries[i],c))}return j}function m(c){return new a.LineString(b(c))}var n={};return n.parse=k,n.convert=l,n.toGeoJSON=k,n.fromGeoJSON=l,n.parseCompressedGeometry=m,n});
+
+}
+
+
+
+
+// Polyfills
+if (!Array.isArray) {
+    Array.isArray = function (arg) {
+        return Object.prototype.toString.call(arg) === '[object Array]';
+    };
+}
+
