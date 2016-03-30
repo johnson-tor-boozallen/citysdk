@@ -643,6 +643,7 @@ CensusModule.prototype.summaryRequest = function (request, callback) {
             censusURL = censusURL.replace(tractPattern, cows.tract);
             censusURL = censusURL.replace(placePattern, cows.place);
             censusURL = censusURL.replace(keyPattern, apiKey);
+
             var request = CitySDK.prototype.sdkInstance.ajaxRequest(censusURL);
 
             //Attach a completion event to the promise
