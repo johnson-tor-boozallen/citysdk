@@ -5,7 +5,15 @@
  */
 
 
-
+if (typeof module !== 'undefined') {
+    var jsdom = require('jsdom').jsdom;
+    var document = jsdom('<html></html>', {});
+    var window = document.defaultView;
+    var jQuery = require('jquery')(window);
+    var C = require("./citysdk.js");
+    var CitySDK = new C.CitySDK();
+    console.log("Node Detected!");
+}
 
 
 (function() {
@@ -211,9 +219,9 @@
 
 //After this point the module is all up to you
 //References to an instance of the SDK should be called as:
-        CitySDK.prototype.sdkInstance;
+//        CitySDK.prototype.sdkInstance;
 //And references to this module should be called as
-        CitySDK.prototype.modules.fema;
+//        CitySDK.prototype.modules.fema;
 //when 'this' is ambiguous
 
         return FEMAModule;

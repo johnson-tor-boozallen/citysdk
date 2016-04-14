@@ -5,7 +5,13 @@
  */
 
 
-
+if (typeof module !== 'undefined') {
+    var jsdom = require('jsdom').jsdom;
+    var document = jsdom('<html></html>', {});
+    var window = document.defaultView;
+    var jQuery = require('jquery')(window);
+    console.log("Node Detected!");
+}
 
 
 (function() {

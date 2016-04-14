@@ -1,8 +1,8 @@
 {
-  "name": "citySDKtests",
-  "version": "0.0.0",
+  "name": "citySDK",
+  "version": "1.6.0",
   "description": "",
-  "main": "test-suite-node.citysdk.js",
+  "main": "citysdk.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -16,7 +16,6 @@
     "url": "https://github.com/uscensusbureau/citysdk/issues"
   },
   "dependencies": {
-    "express": "~4.13.4",
     "jquery": "~2.2.2",
     "jsdom": "~8.1.0",
     "terraformer": "^1.0.5"
