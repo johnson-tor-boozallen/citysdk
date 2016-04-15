@@ -14,10 +14,8 @@ if (typeof module !== 'undefined') {
 }
 
 
-(function() {
-    var CitySDK = (function() {
+
         var CitySDK = function() {
-            CitySDK.prototype.sdkInstance = this;
 
             var idbSupported = false;
 
@@ -58,6 +56,8 @@ if (typeof module !== 'undefined') {
 
             }
 
+            CitySDK.prototype.sdkInstance = this;
+
         };
 
         /**
@@ -66,7 +66,7 @@ if (typeof module !== 'undefined') {
          */
 
         //SDK instance for the callback functions
-        CitySDK.prototype.sdkInstance = null;
+        //CitySDK.prototype.sdkInstance = null;
 
         //Settings
         /**
@@ -328,12 +328,12 @@ if (typeof module !== 'undefined') {
 
         /**
          * Retrieves a value from the cache
-         * @param {string} module name of the CitySDK module
+         * @param {string} citySDKmodule name of the CitySDK module
          * @param {string} hashKey this is a key that identifies the data. Each module has its own hashing scheme.
          * @return {object} the value of the cached data.  Returns false if nothing found
          */
-        CitySDK.prototype.getCachedData = function (module, functionName, hashKey, callback) {
-            if (typeof module == "undefined" || typeof hashKey == "undefined" || module == "" || hashKey == "" || CitySDK.prototype.sdkInstance.allowCache == false) {
+        CitySDK.prototype.getCachedData = function (citySDKmodule, functionName, hashKey, callback) {
+            if (typeof module !== "undefined" || typeof citySDKmodule=="undefined" || typeof hashKey == "undefined" || citySDKmodule == "" || hashKey == "" || CitySDK.prototype.sdkInstance.allowCache == false) {
                 callback(null);
                 return false;
             }
@@ -351,7 +351,7 @@ if (typeof module !== 'undefined') {
                 var store = transaction.objectStore('citySDKCache');
                 var index = store.index('cacheKeys');
                 // Select the first matching record
-                var request = index.get(IDBKeyRange.only([module, functionName, hashKey]));
+                var request = index.get(IDBKeyRange.only([citySDKmodule, functionName, hashKey]));
 
                 request.onerror = function (event) {
                     return null;
@@ -383,18 +383,18 @@ if (typeof module !== 'undefined') {
 
         /**
          * Creates and/or Updates a value from the cache
-         * @param {string} module name of the CitySDK module
+         * @param {string} citySDKmodule name of the CitySDK module
          * @param {string} hashKey this is a key that identifies the data. Each module has its own hashing scheme.
          * @param {object} dataValue this is the data being stored.  It should be an object that contains both the specific data and any meta information needed to invalidate it.
          * @return {object} the value of the cached data.  Returns false if nothing found
          */
-        CitySDK.prototype.setCachedData = function (module, functionName, hashKey, dataValue) {
-            if (typeof module == "undefined" || typeof hashKey == "undefined" || typeof functionName == "undefined" || typeof dataValue == "undefined" || dataValue == "" || module == "" || hashKey == "" || CitySDK.prototype.sdkInstance.allowCache == false) {
+        CitySDK.prototype.setCachedData = function (citySDKmodule, functionName, hashKey, dataValue) {
+            if (typeof module !== "undefined" || typeof citySDKmodule=="undefined" || typeof hashKey == "undefined" || typeof functionName == "undefined" || typeof dataValue == "undefined" || dataValue == "" || citySDKmodule == "" || hashKey == "" || CitySDK.prototype.sdkInstance.allowCache == false) {
                 return false;
             }
 
             // CitySDKdb CitySDKdb citySDKCache
-            var storeData = {"module": module, "functionName": functionName, "hashKey": hashKey, "data": dataValue}
+            var storeData = {"module": citySDKmodule, "functionName": functionName, "hashKey": hashKey, "data": dataValue}
             var openRequest = indexedDB.open("CitySDKdb", 1);
 
             openRequest.onsuccess = function (e) {
@@ -412,12 +412,12 @@ if (typeof module !== 'undefined') {
 
         /**
          * Deletes a value from the cache
-         * @param {string} module name of the CitySDK module
+         * @param {string} citySDKmodule name of the CitySDK module
          * @param {string} hashKey this is a key that identifies the data. Each module has its own hashing scheme.
          * @return {object} the value of the cached data.  Returns false if nothing found
          */
-        CitySDK.prototype.deleteCachedData = function (module, functionName, hashKey) {
-            if (typeof module == "undefined" || typeof hashKey == "undefined" || module == "" || hashKey == "" || CitySDK.prototype.sdkInstance.allowCache == false) {
+        CitySDK.prototype.deleteCachedData = function (citySDKmodule, functionName, hashKey) {
+            if (typeof module !== "undefined" || typeof citySDKmodule=="undefined" || typeof hashKey == "undefined" || citySDKmodule == "" || hashKey == "" || CitySDK.prototype.sdkInstance.allowCache == false) {
                 return false;
             }
 
@@ -493,14 +493,13 @@ if (typeof module !== 'undefined') {
 
 
 
-        return CitySDK;
-    })();
 
-    if (typeof module !== 'undefined')
-        module.exports = {CitySDK: CitySDK};
-    else
+
+    if (typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
+        module.exports = CitySDK;
+    }else{
         window.CitySDK = CitySDK;
-})();
+    }
 
 
 

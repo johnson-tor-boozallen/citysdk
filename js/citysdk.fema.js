@@ -4,20 +4,17 @@
  * @overview The FEMA Module provides access to FEMA's list of disasters.
  */
 
-
-if (typeof module !== 'undefined') {
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
     var jsdom = require('jsdom').jsdom;
     var document = jsdom('<html></html>', {});
     var window = document.defaultView;
     var jQuery = require('jquery')(window);
-    var C = require("./citysdk.js");
-    var CitySDK = new C.CitySDK();
-    console.log("Node Detected!");
+    var CitySDK = require("./citysdk.js");
 }
 
 
-(function() {
-    var FEMAModule = (function() {
+
+
         var FEMAModule = function() {
             this.enabled = false;
             this.iso8601reg = /^([\+-]?\d{4}(?!\d{2}\b))((-?)((0[1-9]|1[0-2])(\3([12]\d|0[1-9]|3[01]))?|W([0-4]\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\d|[12]\d{2}|3([0-5]\d|6[1-6])))([T\s]((([01]\d|2[0-3])((:?)[0-5]\d)?|24\:?00)([\.,]\d+(?!:))?)?(\17[0-5]\d([\.,]\d+)?)?([zZ]|([\+-])([01]\d|2[0-3]):?([0-5]\d)?)?)?)?$/;
@@ -25,7 +22,8 @@ if (typeof module !== 'undefined') {
 
         //Attach a new module object to the CitySDK prototype.
         //It is advised to keep the filenames and module property names the same
-        CitySDK.prototype.modules.fema = new FEMAModule();
+            CitySDK.prototype.modules.fema = new FEMAModule();
+
 
 
 // Endpoint URLS
@@ -45,6 +43,7 @@ if (typeof module !== 'undefined') {
          * @returns {boolean} True if enabled, false if not enabled.
          */
         FEMAModule.prototype.enable = function () {
+            console.log(CitySDK.prototype.version);
             if (CitySDK.prototype.sdkInstance.version >= FEMAModule.prototype.minCoreVersionRequired) {
                 this.enabled = true;
                 return true;
@@ -224,14 +223,14 @@ if (typeof module !== 'undefined') {
 //        CitySDK.prototype.modules.fema;
 //when 'this' is ambiguous
 
-        return FEMAModule;
-    })();
 
-    if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
-        module.exports = {FEMAModule:FEMAModule};
-    else
+
+    if (typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
+        module.exports = FEMAModule;
+    }    else{
         window.FEMAModule = FEMAModule;
-})();
+    }
+
 
 
 
