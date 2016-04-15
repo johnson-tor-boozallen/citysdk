@@ -2,18 +2,25 @@
  * @title CitySDK ArcGIS API Module
  * @module CitySDK ArcGIS API Module
  */
-
-//Attach a new module object to the CitySDK prototype.
-//It is advised to keep the filenames and module property names the same
-CitySDK.prototype.modules.arcgis = new arcgisModule();
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
+    var jsdom = require('jsdom').jsdom;
+    var document = jsdom('<html></html>', {});
+    var window = document.defaultView;
+    var jQuery = require('jquery')(window);
+    var CitySDK = require("./citysdk.js");
+}
 
 /**
  * Instantiates an instance of the CitySDK ArcGIS object.
  * @constructor
  */
-function arcgisModule() {
+var arcgisModule = function() {
     this.enabled = false;
 };
+
+//Attach a new module object to the CitySDK prototype.
+//It is advised to keep the filenames and module property names the same
+CitySDK.prototype.modules.arcgis = new arcgisModule();
 
 /**
  * Enable function. Stores the API key for this module and sets it as enabled.  It will also compare the CitySDK core's version number to the minimum number required as specified for this module.
@@ -418,7 +425,7 @@ arcgisModule.prototype.APIRequest = function(request, callback) {
                     var d = new Date();
                     var n = d.getTime();
                     if('editingInfo' in cachedData){
-                        console.log([Number(dataDescription.editingInfo.lastEditDate)],Number(cachedData.cachedTimestamp));
+                        //console.log([Number(dataDescription.editingInfo.lastEditDate)],Number(cachedData.cachedTimestamp));
                         // Looks for last edited date from ArcGIS source. If the cached copy is more recent, use that.
                         if(Number(cachedData.cachedTimestamp) > Number(dataDescription.editingInfo.lastEditDate)){
                             useCache = true;
@@ -606,10 +613,15 @@ arcgisModule.prototype.APIRequestProcessor = function(request,url,response,callb
  })(function(f){return function(c,t){var a=[].slice.call(arguments,2);return f(function(){c instanceof Function?c.apply(this,a):eval(c)},t)}});
  @end
  @*/
-
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
+    module.exports = arcgisModule;
+}    else{
+    window.CensusModule = arcgisModule;
+}
 
 //References to an instance of the SDK should be called as:
-CitySDK.prototype.sdkInstance;
+//CitySDK.prototype.sdkInstance;
 //And references to this module should be called as
-CitySDK.prototype.modules.arcgis;
+//CitySDK.prototype.modules.arcgis;
 //when 'this' is ambiguous
+

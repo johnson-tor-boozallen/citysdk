@@ -16,6 +16,13 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
 }
 
 
+
+//Module object definition. Every module should have an "enabled" property and an "enable"  function.
+function CensusModule() {
+    this.enabled = false;
+};
+
+
 //Attach a new module object to the CitySDK prototype.
 //It is advised to keep the filenames and module property names the same
 CitySDK.prototype.modules.census = new CensusModule();
@@ -23,10 +30,7 @@ CitySDK.prototype.modules.census = new CensusModule();
  * Instantiates an instance of the CitySDK Census module.
  * @constructor
  */
-//Module object definition. Every module should have an "enabled" property and an "enable"  function.
-function CensusModule() {
-    this.enabled = false;
-};
+
 
 
 // Version Numbers
@@ -40,7 +44,7 @@ CensusModule.prototype.DEFAULT_API = "acs5";
 // Endpoint URLS
 CensusModule.prototype.DEFAULT_ENDPOINTS = {};
 CensusModule.prototype.DEFAULT_ENDPOINTS.acsVariableDictionaryURL = "//api.census.gov/data/";
-CensusModule.prototype.DEFAULT_ENDPOINTS.geocoderURL = "//geocoding.geo.census.gov/geocoder/geographies/";
+CensusModule.prototype.DEFAULT_ENDPOINTS.geocoderURL = "https://geocoding.geo.census.gov/geocoder/geographies/";
 CensusModule.prototype.DEFAULT_ENDPOINTS.tigerwebURL = "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/";
 CensusModule.prototype.DEFAULT_ENDPOINTS.censusURL = "//api.census.gov/data/";
 
@@ -285,8 +289,8 @@ CensusModule.prototype.getVariableDictionary = function (inapi, inyear, callback
     var year = intermediate[1];
 
     var cacheKey = api.toString() + year.toString();
-
     CitySDK.prototype.sdkInstance.getCachedData("census", "getVariableDictionary", cacheKey, function (cachedData) {
+
         if (cachedData != null) {
             callback(cachedData);
             return;
@@ -300,6 +304,7 @@ CensusModule.prototype.getVariableDictionary = function (inapi, inyear, callback
 
             CitySDK.prototype.sdkInstance.ajaxRequest(URL).done(
                 function (response) {
+
                     response = jQuery.parseJSON(response);
                     CitySDK.prototype.sdkInstance.setCachedData("census", "getVariableDictionary", cacheKey, response);
                     callback(response);
@@ -340,15 +345,13 @@ CensusModule.prototype.latLngToFIPS = function (inlat, inlng, callback) {
 
             //The question mark at the end of this url tells JQuery to handle setting up and calling the JSONP callback
             var geocoderURL = CensusModule.prototype.DEFAULT_ENDPOINTS.geocoderURL + "coordinates?x={lng}&y={lat}&benchmark=4&vintage=4&layers=8,12,28,86,84&format=jsonp&callback=?";
-
+console.log("latLngToFIPS internal");
             //Insert our requested coordinates into the geocoder url
             geocoderURL = geocoderURL.replace(latPattern, lat);
             geocoderURL = geocoderURL.replace(lngPattern, lng);
             //Make our AJAX request
-            var request = CitySDK.prototype.sdkInstance.jsonpRequest(geocoderURL);
-
-            //Attach a completion event to the promise
-            request.done(function (response) {
+            CitySDK.prototype.sdkInstance.jsonpRequest(geocoderURL).done(function (response) {
+                console.log("latLngToFIPS done");
                 //Call the callback
                 if (CitySDK.prototype.sdkInstance.allowCache == true) {
                     CitySDK.prototype.sdkInstance.setCachedData("census", "latLngToFIPS", cacheKey, response.result.geographies);
@@ -1376,7 +1379,6 @@ CensusModule.prototype.GEORequest = function (requestIn, callback) {
 
                         CensusModule.prototype.SUPPLEMENTAL_REQUESTS_IN_FLIGHT++;
                         CitySDK.prototype.sdkInstance.modules.census.APIRequest(suppRequest, function (resp) {
-                            console.log(resp);
                             CensusModule.prototype.SUPPLEMENTAL_REQUESTS_IN_FLIGHT--;
                             for (var property in resp.data[0]) {
                                 if (resp.data[0].hasOwnProperty(property)) {

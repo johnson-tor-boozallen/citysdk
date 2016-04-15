@@ -96,7 +96,7 @@ if (typeof module !== 'undefined') {
                 type: 'GET',
                 dataType: 'text',
                 contentType: 'text/plain',
-                url: url
+                url: this.defaultProtocol(url),
             });
         };
 
@@ -110,7 +110,7 @@ if (typeof module !== 'undefined') {
                 type: 'GET',
                 dataType: "jsonp",
                 contentType: 'text/plain',
-                url: url
+                url: this.defaultProtocol(url),
             });
         };
 
@@ -123,11 +123,27 @@ if (typeof module !== 'undefined') {
         CitySDK.prototype.postRequest = function (url, data) {
             return jQuery.ajax({
                 type: "POST",
-                url: url,
+                url: this.defaultProtocol(url),
                 data: data,
                 dataType: "text"
             });
         };
+
+
+        CitySDK.prototype.defaultProtocol = function (url){
+            if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+                if (url.search(/^http[s]?\:/) == -1) {
+                    if(url.indexOf("//") == 0){
+                        url = 'https:' + url;
+                    }else{
+                        url = 'https://' + url;
+
+                    }
+                }
+            }
+                return url;
+        };
+
 
 
         // General cross-module utility functions

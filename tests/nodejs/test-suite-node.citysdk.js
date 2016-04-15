@@ -6,8 +6,9 @@ var jQuery = require('jquery')(window);
 
 
 var CitySDK = require("../../js/citysdk.js");
-var F = require("../../js/citysdk.fema.js");
-var CensusModule = require("../../js/citysdk.census.js");
+var FM = require("../../js/citysdk.fema.js");
+var CM = require("../../js/citysdk.census.js");
+var GA = require("../../js/citysdk.arcgis.js");
 
 var sdk = new CitySDK();
 
@@ -15,7 +16,6 @@ var sdk = new CitySDK();
 
 
 sdk.allowCache = true;
-var census = sdk.modules.census;
 var censusAPIkey = "21ca50e1a3e22cf2b18083748c278199395408ec";
 
 //localStorage.clear();
@@ -159,22 +159,35 @@ function testFEMAModule() {
 
     });
 
+
+    asyncTestsRunning++;
+
+    fema.DisasterDeclarationsSummariesRequest(request,function(response){
+        asyncTestsRunning--;
+        console.log("Fema response 2");
+        if(response['DisasterDeclarationsSummaries'][3]['disasterNumber']!="1491"){
+            failTest(moduleName, "DisasterDeclarationsSummariesRequest", "Disaster number not found in response");
+        }
+        updateStatusDisplay();
+
+    });
+
     updateStatusDisplay();
 
 }// testFemaModule
 
+census = sdk.modules.census;
 function testCensusModule() {
-    console.log("Testing Census Module");
+    console.log("Census: Testing Census Module");
     var moduleName = "census";
     var request = {};
     testResultStatus[moduleName] = true;
 
-    census = sdk.modules.census;
     census.enable(censusAPIkey);
 
 
     // Convert Alias to Variable
-    console.log("Testing parseToVariable");
+    console.log("Census: Testing parseToVariable");
     if (census.parseToVariable("employment_labor_force") != "B23025_002E") {
         failTest(moduleName, "parseToVariable", "Failed to get variable from alias name");
     }
@@ -193,12 +206,12 @@ function testCensusModule() {
         ]
     };
 
-    console.log("Testing parseRequestStateCode");
+    console.log("Census: Testing parseRequestStateCode");
     request = census.parseRequestStateCode(request);
     if (request.lat != 37.5333 && request.lng != -77.4667) {
         failTest(moduleName, "parseRequestStateCode", "Failed to get stat capital coordinates");
     }else{
-        console.log("Success parseRequestStateCode");
+        console.log("Census: Success parseRequestStateCode");
     }
 
 
@@ -210,11 +223,10 @@ function testCensusModule() {
 
     // getACSVariableDictionary
     asyncTestsRunning++;
-    console.log("Testing getACSVariableDictionary 2013");
-    census.getACSVariableDictionary("acs5", 2013, function (result) {
+    console.log("Census: Testing getVariableDictionary 2013");
+    census.getVariableDictionary("acs5", 2013, function (result) {
         asyncTestsRunning--;
-        console.log("Testing getACSVariableDictionary 2013 Response");
-        console.log(result);
+        console.log("Census: Testing getACSVariableDictionary 2013 Response");
         if (typeof result.variables != undefined) {
             if (typeof result.variables.B23025_006E == undefined) {
                 failTest(moduleName, "getACSVariableDictionary", "ACS5 2013 Variable array exists but one or more variables is missing.");
@@ -225,11 +237,10 @@ function testCensusModule() {
     });
 
     asyncTestsRunning++;
-    console.log("Testing getACSVariableDictionary 2014");
+    console.log("Census: Testing getACSVariableDictionary 2014");
     census.getACSVariableDictionary("acs1", 2014, function (result) {
         asyncTestsRunning--;
-        console.log("Testing getACSVariableDictionary 2014 Response");
-        console.log(result);
+        console.log("Census: Testing getACSVariableDictionary 2014 Response");
         if (typeof result.variables != undefined) {
             if (typeof result.variables.B24126_438E == undefined) {
                 failTest(moduleName, "getACSVariableDictionary", "ACS5 2013 Variable array exists but one or more variables is missing.");
@@ -243,8 +254,11 @@ function testCensusModule() {
 
     // latLngToFIPS
     asyncTestsRunning++;
+    console.log("Census: latLngToFIPS");
     census.latLngToFIPS("25.7753", "-80.2089", function (moo) {
         asyncTestsRunning--;
+        console.log("Census: latLngToFIPS response");
+
         if (moo.States === null || moo["2010 Census Blocks"] === null) {
             failTest(moduleName, "latLngToFIPS", "Failed to get FIPS information from coordinate points. Note: it is possible that the Geocoder service may not be returning the valid data. Re-run test.");
         } else if (moo.States[0].BASENAME.toLowerCase() != "florida") {
@@ -255,7 +269,10 @@ function testCensusModule() {
 
     // addressToFIPS
     asyncTestsRunning++;
+    console.log("Census: addressToFIPS response");
+
     census.addressToFIPS("777 Lynn Street", "Herndon", "VA", function (response) {
+        console.log("Census: addressToFIPS");
 
         asyncTestsRunning--;
         if (response[0].geographies.States === null) {
@@ -269,8 +286,11 @@ function testCensusModule() {
 
     // ZIPtoLatLng
     asyncTestsRunning++;
+    console.log("Census: ZIPtoLatLng Start");
     census.ZIPtoLatLng("20190", function (response) {
         asyncTestsRunning--;
+        console.log("Census: ZIPtoLatLng Response");
+
         if (parseFloat(response.lat) != 38.9597752 && parseFloat(response.lng) != -77.3368607) {
             failTest(moduleName, "ZIPtoLatLng", "Failed to get coordinates from zip code. Note: it is possible that the Geocoder service may not be returning the valid data. Re-run test.");
         }
@@ -294,7 +314,9 @@ function testCensusModule() {
 
 
     // Tests that require valid FIPS location
+    console.log("Census: latLngToFIPS Outer Test Start");
     census.latLngToFIPS("25.7753", "-80.2089", function (geographies) {
+        console.log("Census: latLngToFIPS Outer Test Response");
         var fipsData = geographies["2010 Census Blocks"][0];
         request["state"] = fipsData["STATE"];
         request["county"] = fipsData["COUNTY"];
@@ -306,13 +328,14 @@ function testCensusModule() {
         request.geocoded = true;
 
         census.validateRequestGeographyVariables(request, function(response){
-
+            console.log("validateRequestGeographyVariables")
         });
 
 
-
-        census.acsSummaryRequest(request, function (response) {
+        console.log("Census: SummaryRequest");
+        census.summaryRequest(request, function (response) {
             asyncTestsRunning--;
+            console.log("Census: SummaryRequest Responses");
             if (response[1][2] != "189255") {
                 failTest(moduleName, "acsSummaryRequest", "2013 ACS1 State Level with sublevel Request Failed");
             }
@@ -367,7 +390,6 @@ function testCensusModule() {
         console.log("SummaryRequest");
         census.summaryRequest(request, function (response) {
             console.log("SummaryRequest Response");
-            console.log(response);
             asyncTestsRunning--;
             if (response[1][1] != "2496435") {
                 failTest(moduleName, "summaryRequest", "2010 SF1 County Level Request Failed: Population variable not included in data or not correct");
@@ -388,7 +410,6 @@ function testCensusModule() {
         ];
 
         census.summaryRequest(request, function (response) {
-            console.log(response);
 
             asyncTestsRunning--;
             if (response[1][1] != "11382895") {
@@ -478,6 +499,81 @@ function testCensusModule() {
 } // end testCensusModule
 
 
+var arcgis = sdk.modules.arcgis;
+function testArcGISModule() {
+    sdk.allowCache = false;
+
+    var moduleName = "arcgis";
+    var request = {};
+    var response;
+    testResultStatus[moduleName] = true;
+
+
+    arcgis.enable();
+
+    arcgis.DEFAULT_ENDPOINTS.apiURL = "http://services.arcgis.com/VTyQ9soqVukalItT/";
+    asyncTestsRunning++;
+    arcgis.seriesRequest(request,function(response){
+        asyncTestsRunning--;
+        if(!('services' in response)){
+            failTest(moduleName, "seriesRequest", "Failed to retrieve service list from " + arcgis.DEFAULT_ENDPOINTS.apiURL);
+        }
+        updateStatusDisplay();
+    });
+
+    var request = {
+        'api' : "Jobs_Proximity_Index",
+        'level' : 0
+    };
+    asyncTestsRunning++;
+    arcgis.getVariableDictionary(request,function(response){
+        asyncTestsRunning--;
+        if(!('fields' in response)){
+            failTest(moduleName, "getVariableDictionary", "Failed to retrieve variable list and layer description from " + arcgis.DEFAULT_ENDPOINTS.apiURL + " :: " + request.api);
+        }
+        updateStatusDisplay();
+
+    });
+
+    asyncTestsRunning++;
+    arcgis.getLevelDictionary(request,function(response){
+        asyncTestsRunning--;
+        if(!('layers' in response)){
+            failTest(moduleName, "getLevelDictionary", "Failed to retrieve variable list and layer description from " + arcgis.DEFAULT_ENDPOINTS.apiURL + " :: " + request.api);
+        }
+        updateStatusDisplay();
+
+    });
+
+
+    request = {
+        "api": "Jobs_Proximity_Index",
+        "level": "0",
+        "where": "JOBS_IDX > 50 AND JOBS_IDX < 52",
+        "variables": [
+            "BLOCKGROUPID",
+            "JOBS_IDX",
+            "AVariableThatDoesNotExist"
+        ],
+        'limit': 50
+    };
+    asyncTestsRunning++;
+    arcgis.APIRequest(request,function(response){
+        asyncTestsRunning--;
+        if(!('features' in response)){
+            failTest(moduleName, "APIRequest", "Failed to retrieve features from " + arcgis.DEFAULT_ENDPOINTS.apiURL + " :: " + request.api);
+        }
+        updateStatusDisplay();
+
+    });
+
+
+    updateStatusDisplay();
+
+}// testCensusModule
+
+
+
 
 
 
@@ -501,6 +597,7 @@ function testCensusModule() {
 runCoreTest();
 testCensusModule();
 testFEMAModule();
+testArcGISModule();
 //var CitySDK = require("./citysdk/citysdk.arcgis.js");
 /*
     */
