@@ -350,8 +350,9 @@ console.log("latLngToFIPS internal");
             geocoderURL = geocoderURL.replace(latPattern, lat);
             geocoderURL = geocoderURL.replace(lngPattern, lng);
             //Make our AJAX request
-            CitySDK.prototype.sdkInstance.jsonpRequest(geocoderURL).done(function (response) {
-                console.log("latLngToFIPS done");
+            var request = CitySDK.prototype.sdkInstance.jsonpRequest(geocoderURL);
+
+            request.done(function (response) {
                 //Call the callback
                 if (CitySDK.prototype.sdkInstance.allowCache == true) {
                     CitySDK.prototype.sdkInstance.setCachedData("census", "latLngToFIPS", cacheKey, response.result.geographies);

@@ -48,20 +48,40 @@ function runCoreTest(){
     console.log("Core: Testing ajaxRequest");
     sdk.ajaxRequest("https://data.ct.gov/resource/y6p2-px98.json?category=Fruit&item=Peaches").done(function(response) {
         //console.log(JSON.parse(response));
-        console.log("ajaxRequest Response");
+        console.log("Core: ajaxRequest Response");
         //console.log(response);
     });
 
     sdk.ajaxRequest("https://data.ct.gov/resource/y6p2-px98.json?category=Fruit&item=Peaches").done(function(response) {
         //console.log(JSON.parse(response));
-        console.log("ajaxRequest Response 2");
+        console.log("Core: ajaxRequest Response 2");
         //console.log(response);
     });
 
     sdk.ajaxRequest("https://data.ct.gov/resource/y6p2-px98.json?category=Fruit&item=Apples").done(function(moo) {
         //console.log(JSON.parse(response));
-        console.log("ajaxRequest Response 3");
+        console.log("Core: ajaxRequest Response 3");
         //console.log(response);
+    });
+
+
+
+    var hamster = sdk.jsonpRequest("https://geocoding.geo.census.gov/geocoder/geographies/coordinates?x=-80.2089&y=25.7753&benchmark=4&vintage=4&layers=8,12,28,86,84&format=jsonp");
+
+
+        hamster.done(function(moo) {
+            //console.log(JSON.parse(response));
+            console.log("Core: JSONP Request Response");
+            //console.log(response);
+        });
+
+    hamster.fail(function( jqXHR, textStatus, errorThrown ){
+        console.log("latLngToFIPS Failed");
+        console.log(errorThrown);
+        console.log(textStatus);
+        console.log(jqXHR);
+
+
     });
 
     //parseRequestLatLng
@@ -476,6 +496,7 @@ function testCensusModule() {
             "ESTAB"
         ];
         census.GEORequest(request, function (response) {
+            console.log("Census: GEORequest Complete");
             asyncTestsRunning--;
             if(response != false){
                 failTest(moduleName, "GEORequest", "Function returned data with invalid geographic specification.");
@@ -594,10 +615,10 @@ function testArcGISModule() {
 // Run the Tests
 // Run the Tests
 // Run the Tests
-runCoreTest();
+//runCoreTest();
 testCensusModule();
-testFEMAModule();
-testArcGISModule();
+//testFEMAModule();
+//testArcGISModule();
 //var CitySDK = require("./citysdk/citysdk.arcgis.js");
 /*
     */

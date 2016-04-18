@@ -11,6 +11,11 @@ if (typeof module !== 'undefined') {
     var window = document.defaultView;
     var jQuery = require('jquery')(window);
     console.log("Node Detected!");
+
+    // Allow SSL with incomplete intermediate chains and self-signed certificates
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
+
 }
 
 
@@ -106,10 +111,13 @@ if (typeof module !== 'undefined') {
          * @return {object} Returns a standard ajax promise
          */
         CitySDK.prototype.jsonpRequest = function (url) {
+            console.log(url);
             return jQuery.ajax({
                 type: 'GET',
                 dataType: "jsonp",
                 contentType: 'text/plain',
+                //headers: {"User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 6310.61.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.94 Safari/537.36"},
+                callback: "mooIsMe",
                 url: this.defaultProtocol(url),
             });
         };
