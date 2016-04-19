@@ -25,7 +25,7 @@ CitySDK.prototype.modules.arcgis = new arcgisModule();
 /**
  * Enable function. Stores the API key for this module and sets it as enabled.  It will also compare the CitySDK core's version number to the minimum number required as specified for this module.
  *
- * @param {string} apiKey The census API key.
+ * @param {string} apiKey API key if required.
  * @returns {boolean} True if enabled, false if not enabled.
  */
 arcgisModule.prototype.enable = function(apiKey) {
@@ -191,7 +191,7 @@ arcgisModule.prototype.getLevelDictionary = function(request,callback){
             CitySDK.prototype.sdkInstance.ajaxRequest(arcURL).done(
                 function (response) {
                     response = jQuery.parseJSON(response);
-                    CitySDK.prototype.sdkInstance.setCachedData("census", "getLevelDictionary", cacheKey, response);
+                    CitySDK.prototype.sdkInstance.setCachedData("arcgis", "getLevelDictionary", cacheKey, response);
                     callback(response);
                 }
             );
@@ -280,7 +280,7 @@ arcgisModule.prototype.getVariableDictionary = function (request, callback) {
             CitySDK.prototype.sdkInstance.ajaxRequest(arcURL).done(
                 function (response) {
                     response = jQuery.parseJSON(response);
-                    CitySDK.prototype.sdkInstance.setCachedData("census", "getVariableDictionary", cacheKey, response);
+                    CitySDK.prototype.sdkInstance.setCachedData("arcgis", "getVariableDictionary", cacheKey, response);
                     callback(response);
                 }
             );
@@ -616,7 +616,7 @@ arcgisModule.prototype.APIRequestProcessor = function(request,url,response,callb
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
     module.exports = arcgisModule;
 }    else{
-    window.CensusModule = arcgisModule;
+    window.arcgisModule = arcgisModule;
 }
 
 //References to an instance of the SDK should be called as:

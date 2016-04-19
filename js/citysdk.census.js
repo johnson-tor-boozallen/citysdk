@@ -18,7 +18,7 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
 
 
 //Module object definition. Every module should have an "enabled" property and an "enable"  function.
-function CensusModule() {
+var CensusModule = function() {
     this.enabled = false;
 };
 
@@ -333,7 +333,6 @@ CensusModule.prototype.latLngToFIPS = function (inlat, inlng, callback) {
     var lng = intermediate[1];
 
     var cacheKey = lat.toString() + lng.toString();
-
     // Check to see if this question is cached
     CitySDK.prototype.sdkInstance.getCachedData("census", "latLngToFIPS", cacheKey, function (cachedData) {
         if (cachedData != null) {
@@ -345,7 +344,6 @@ CensusModule.prototype.latLngToFIPS = function (inlat, inlng, callback) {
 
             //The question mark at the end of this url tells JQuery to handle setting up and calling the JSONP callback
             var geocoderURL = CensusModule.prototype.DEFAULT_ENDPOINTS.geocoderURL + "coordinates?x={lng}&y={lat}&benchmark=4&vintage=4&layers=8,12,28,86,84&format=jsonp&callback=?";
-console.log("latLngToFIPS internal");
             //Insert our requested coordinates into the geocoder url
             geocoderURL = geocoderURL.replace(latPattern, lat);
             geocoderURL = geocoderURL.replace(lngPattern, lng);
@@ -1085,6 +1083,7 @@ CensusModule.prototype.APIRequest = function (requestIn, callback) {
     if("geographyValidForAPI" in request){
         if(request.geographyValidForAPI == false){
             callback({});
+            //TODO: Replace this with a formal error handler
             return;
         }else if ("variables" in request) {
             //If we don't have a data object in the request, create one
@@ -1236,7 +1235,6 @@ CensusModule.prototype.validateRequestGeographyVariables = function(requestIn,ca
         if (cachedData != null) {
             // Use cached geography definition
             request.geographyValidForAPI = CensusModule.prototype.validateRequestGeographyVariablesProcess(request,cachedData);
-
             callback(request);
             return;
         } else {

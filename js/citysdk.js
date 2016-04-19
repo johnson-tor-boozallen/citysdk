@@ -15,7 +15,6 @@ if (typeof module !== 'undefined') {
     // Allow SSL with incomplete intermediate chains and self-signed certificates
     // Many API's are missing their intermediate certificates and WILL fail on node
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-
 }
 
 
@@ -58,7 +57,6 @@ if (typeof module !== 'undefined') {
                     console.log("Error");
                     console.dir(e);
                 }
-
             }
 
             CitySDK.prototype.sdkInstance = this;
@@ -93,8 +91,6 @@ if (typeof module !== 'undefined') {
 
 
         CitySDK.prototype.exception = function(module,functionName,errorText, callback){
-            console.log("CitySDK Failed");
-
             var errorMessage = "CitySDK - " + module+ "."+functionName+": "+errorText;
             if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
                 console.log(errorMessage);
@@ -116,6 +112,8 @@ if (typeof module !== 'undefined') {
         CitySDK.prototype.ajaxRequest = function (url) {
             return jQuery.ajax({
                 type: 'GET',
+                timeout: 20000,
+
                 dataType: 'text',
                 contentType: 'text/plain',
                 url: this.defaultProtocol(url),
@@ -128,13 +126,11 @@ if (typeof module !== 'undefined') {
          * @return {object} Returns a standard ajax promise
          */
         CitySDK.prototype.jsonpRequest = function (url) {
-            console.log(url);
             return jQuery.ajax({
                 type: 'GET',
                 dataType: "jsonp",
+                timeout: 20000,
                 contentType: 'text/plain',
-                //headers: {"User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 6310.61.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.94 Safari/537.36"},
-                callback: "mooIsMe",
                 url: this.defaultProtocol(url),
             });
         };
@@ -148,6 +144,8 @@ if (typeof module !== 'undefined') {
         CitySDK.prototype.postRequest = function (url, data) {
             return jQuery.ajax({
                 type: "POST",
+                timeout: 20000,
+
                 url: this.defaultProtocol(url),
                 data: data,
                 dataType: "text"

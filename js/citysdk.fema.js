@@ -28,7 +28,7 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
 
 // Endpoint URLS
         FEMAModule.prototype.DEFAULT_ENDPOINTS = {};
-        FEMAModule.prototype.DEFAULT_ENDPOINTS.apiURL = "https://aaawww.fema.gov/api/open/v1/DisasterDeclarationsSummaries?";
+        FEMAModule.prototype.DEFAULT_ENDPOINTS.apiURL = "https://www.fema.gov/api/open/v1/DisasterDeclarationsSummaries?";
 
 
 // Version Numbers
@@ -43,7 +43,6 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
          * @returns {boolean} True if enabled, false if not enabled.
          */
         FEMAModule.prototype.enable = function () {
-            console.log(CitySDK.prototype.version);
             if (CitySDK.prototype.sdkInstance.version >= FEMAModule.prototype.minCoreVersionRequired) {
                 this.enabled = true;
                 return true;
