@@ -184,8 +184,10 @@ function testFEMAModule() {
 
     fema.DisasterDeclarationsSummariesRequest(request,function(response){
         asyncTestsRunning--;
-        console.log("Fema response 2");
-        if(response['DisasterDeclarationsSummaries'][3]['disasterNumber']!="1491"){
+        console.log("Fema response 2 " + typeof response);
+        console.log(response);
+        if(response == null || response['DisasterDeclarationsSummaries'][3]['disasterNumber']!="1491"){
+            console.log("Fema response 2 failed");
             failTest(moduleName, "DisasterDeclarationsSummariesRequest", "Disaster number not found in response");
         }
         updateStatusDisplay();
@@ -616,8 +618,8 @@ function testArcGISModule() {
 // Run the Tests
 // Run the Tests
 //runCoreTest();
-testCensusModule();
-//testFEMAModule();
+//testCensusModule();
+testFEMAModule();
 //testArcGISModule();
 //var CitySDK = require("./citysdk/citysdk.arcgis.js");
 /*

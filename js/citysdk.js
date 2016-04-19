@@ -13,8 +13,8 @@ if (typeof module !== 'undefined') {
     console.log("Node Detected!");
 
     // Allow SSL with incomplete intermediate chains and self-signed certificates
+    // Many API's are missing their intermediate certificates and WILL fail on node
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-
 
 }
 
@@ -90,6 +90,23 @@ if (typeof module !== 'undefined') {
          * @type {object}
          */
         CitySDK.prototype.modules = {};
+
+
+        CitySDK.prototype.exception = function(module,functionName,errorText, callback){
+            console.log("CitySDK Failed");
+
+            var errorMessage = "CitySDK - " + module+ "."+functionName+": "+errorText;
+            if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+                console.log(errorMessage);
+            }
+            if(typeof callback !== "function"){
+                throw new Error(errorMessage);
+            }else{
+                callback(new Error(errorMessage));
+            }
+
+        };
+
 
         /**
          * Makes an AJAX call

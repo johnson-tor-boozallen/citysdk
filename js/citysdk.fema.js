@@ -28,7 +28,7 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
 
 // Endpoint URLS
         FEMAModule.prototype.DEFAULT_ENDPOINTS = {};
-        FEMAModule.prototype.DEFAULT_ENDPOINTS.apiURL = "https://www.fema.gov/api/open/v1/DisasterDeclarationsSummaries?";
+        FEMAModule.prototype.DEFAULT_ENDPOINTS.apiURL = "https://aaawww.fema.gov/api/open/v1/DisasterDeclarationsSummaries?";
 
 
 // Version Numbers
@@ -198,9 +198,15 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
                 disasterURL += "$top=" + Number(request.take); //Default - root list of all datasets
             }
 
-            CitySDK.prototype.sdkInstance.ajaxRequest(disasterURL).done(function (response) {
+            var ajR = CitySDK.prototype.sdkInstance.ajaxRequest(disasterURL);
+
+            ajR.done(function (response) {
                 response = jQuery.parseJSON(response);
                 callback(response);
+            });
+
+            ajR.fail(function( jqXHR, textStatus, errorThrown){
+                CitySDK.prototype.sdkInstance.exception("fema","apirequest",textStatus,callback);
             });
 
         };
