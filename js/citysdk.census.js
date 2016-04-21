@@ -1033,8 +1033,8 @@ CensusModule.prototype.APIRequest = function (requestIn, callback) {
                 request.lat = response.lat;
                 request.lng = response.lng;
                 CitySDK.prototype.sdkInstance.modules.census.APIRequest(request, callback);
-                return;
             });
+            return;
         }
     }
 
@@ -1052,8 +1052,8 @@ CensusModule.prototype.APIRequest = function (requestIn, callback) {
                 request.address.addressMatch = response[0];
 
                 CitySDK.prototype.sdkInstance.modules.census.APIRequest(request, callback);
-                return;
-            })
+            });
+            return;
         }
     }
 
