@@ -264,26 +264,7 @@ function testCensusModule() {
         });
 
 
-        asyncTestsRunning++;
-        // Note - this is INVALID input.  The function is SUPPOSED to fail.
-        request.level = "tract";
-        request.sublevel = false;
-        request.year = 2007;
-        request.api = "ewks";
-        request.variables = [
-            "EMP",
-            "ESTAB"
-        ];
-        census.GEORequest(request, function (response) {
-            asyncTestsRunning--;
-            if(response != false){
-                failTest(moduleName, "GEORequest", "Function returned data with invalid geographic specification.");
-
-            }
-            updateStatusDisplay();
-
-        });
-
+       
 
 
 

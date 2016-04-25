@@ -10,6 +10,9 @@ if (typeof module !== 'undefined') {
     var document = jsdom('<html></html>', {});
     var window = document.defaultView;
     var jQuery = require('jquery')(window);
+    var Terraformer = require('terraformer');
+    Terraformer.ArcGIS = require('terraformer-arcgis-parser');
+
     console.log("Node Detected!");
 
     // Allow SSL with incomplete intermediate chains and self-signed certificates
@@ -93,7 +96,7 @@ if (typeof module !== 'undefined') {
         CitySDK.prototype.exception = function(module,functionName,errorText, callback){
             var errorMessage = "CitySDK - " + module+ "."+functionName+": "+errorText;
             if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
-                console.log(errorMessage);
+                console.error(errorMessage);
             }
             if(typeof callback !== "function"){
                 throw new Error(errorMessage);

@@ -901,14 +901,17 @@ CensusModule.prototype.tigerwebRequest = function (request, callback) {
         var tigerRequestSubmitted = JSON.parse(JSON.stringify(tigerRequest));
         CitySDK.prototype.sdkInstance.getCachedData("census", "tigerwebRequest", cacheKey, function (cachedData) {
             if (cachedData != null) {
-                callback(CitySDK.prototype.sdkInstance.modules.census.ESRItoGEO(cachedData));
+                var intermediateResponse = CitySDK.prototype.sdkInstance.ESRItoGEO(cachedData);
+                callback(intermediateResponse);
+
                 return;
             } else {
                 CitySDK.prototype.sdkInstance.postRequest(tigerURLReq, tigerRequestSubmitted).done(
                     function (response) {
                         CitySDK.prototype.sdkInstance.setCachedData("census", "tigerwebRequest", cacheKey, response);
-
-                        callback(CitySDK.prototype.sdkInstance.modules.census.ESRItoGEO(response));
+                        var intermediateResponse = CitySDK.prototype.sdkInstance.ESRItoGEO(response);
+                        callback(intermediateResponse);
+                        return;
                     });
             }
         });
@@ -983,6 +986,7 @@ CensusModule.prototype.tigerwebRequest = function (request, callback) {
  */
 CensusModule.prototype.APIRequest = function (requestIn, callback) {
     var request = JSON.parse(JSON.stringify(requestIn));
+
     if (!("api" in request)) {
         request.api = this.DEFAULT_API;
     }
@@ -1000,7 +1004,7 @@ CensusModule.prototype.APIRequest = function (requestIn, callback) {
             if (!("year" in request)) {
                 request.year = possibleYears[0];
             }else if (this.availableDataSets[request.api].indexOf(request.year.toString()) == -1) {
-                console.log("Warning: API " + request.api + " does not appear to support " + request.year);
+                console.error("Warning: API " + request.api + " does not appear to support " + request.year);
                 request.year = possibleYears[0];
             }
         }
@@ -1081,11 +1085,15 @@ CensusModule.prototype.APIRequest = function (requestIn, callback) {
 
     // Check to see if geography is complete as required by api
     if("geographyValidForAPI" in request){
+
         if(request.geographyValidForAPI == false){
-            callback({});
+            //callback({});
+
+            CitySDK.prototype.sdkInstance.exception("census","APIRequest","Geography Not Valid for API");
             //TODO: Replace this with a formal error handler
             return;
         }else if ("variables" in request) {
+
             //If we don't have a data object in the request, create one
             if (!("data" in request)) request.data = [];
 
@@ -1094,6 +1102,7 @@ CensusModule.prototype.APIRequest = function (requestIn, callback) {
             this.summaryRequest(
                 request,
                 function (response) {
+
                     if (request.sublevel) {
                         //If sublevel is set to true, our "data" property will be an array of objects for each sublevel item.
                         request.data = [];
@@ -1291,6 +1300,7 @@ CensusModule.prototype.validateRequestGeographyVariablesProcess = function(reque
             }
         }
     });
+
     return found;
 };
 
@@ -1317,7 +1327,6 @@ CensusModule.prototype.validateRequestGeographyVariablesProcess = function(reque
  * @param {function} callback The callback to take the response, which is geoJSON
  */
 CensusModule.prototype.GEORequest = function (requestIn, callback) {
-
     //Reference dictionary of levels -> geocoder response variables
     var comparisonVariables = {
         "tract": "TRACT",
@@ -1326,10 +1335,17 @@ CensusModule.prototype.GEORequest = function (requestIn, callback) {
         "blockGroup": "BLKGRP"
     };
     var request = JSON.parse(JSON.stringify(requestIn));
+
     //First - check if we have a data object in the request OR if we aren't requesting variables
-    if ("data" in request || !("variables" in request)) {
+    if (typeof request.data != "undefined" || !("variables" in request)) {
+
+
         //We have a data object for the request (or there isn't any requested), now we can get the geoJSON for the area
         CitySDK.prototype.sdkInstance.modules.census.tigerwebRequest(request, function (response) {
+
+            if(typeof request.flagMe !="undefined" && typeof request.data != "undefined"){
+                request.step = "a3";
+            }
             if(response == false){
                 // No data returned
                 callback(false);
@@ -1375,7 +1391,6 @@ CensusModule.prototype.GEORequest = function (requestIn, callback) {
                             "variables": variables,
                             "featuresIndex": i
                         };
-
                         CensusModule.prototype.SUPPLEMENTAL_REQUESTS_IN_FLIGHT++;
                         CitySDK.prototype.sdkInstance.modules.census.APIRequest(suppRequest, function (resp) {
                             CensusModule.prototype.SUPPLEMENTAL_REQUESTS_IN_FLIGHT--;
@@ -1408,8 +1423,10 @@ CensusModule.prototype.GEORequest = function (requestIn, callback) {
         });
     } else {
         //We do not have the requested variables - let's get them
+        request.flagMe = true;
         CitySDK.prototype.sdkInstance.modules.census.APIRequest(request, function (response) {
             CitySDK.prototype.sdkInstance.modules.census.GEORequest(response, callback);
+            return;
         });
     }
 };

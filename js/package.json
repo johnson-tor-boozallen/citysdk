@@ -18,6 +18,7 @@
   "dependencies": {
     "jquery": "~2.2.2",
     "jsdom": "~8.1.0",
-    "terraformer": "^1.0.5"
+    "terraformer": "^1.0.5",
+    "terraformer-arcgis-parser": "^1.0.4"
   }
 }

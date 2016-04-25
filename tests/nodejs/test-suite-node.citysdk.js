@@ -304,12 +304,12 @@ function testCensusModule() {
 
     // addressToFIPS
     asyncTestsRunning++; asyncTestList.push("addressToFIPS");
-    console.log("Census: addressToFIPS response");
+    console.log("Census: addressToFIPS");
 
     census.addressToFIPS("777 Lynn Street", "Herndon", "VA", function (response) {
-        console.log("Census: addressToFIPS");
-
+        console.log("Census: addressToFIPS response");
         asyncTestsRunning--; removeAsyncTest("addressToFIPS");
+
         if (response[0].geographies.States === null) {
             failTest(moduleName, "addressToFIPS", "Failed to get FIPS information from address. Note: it is possible that the Geocoder service may not be returning the valid data. Re-run test.");
         } else if (response[0].geographies.States[0].BASENAME.toLowerCase() != "virginia") {
@@ -497,26 +497,6 @@ function testCensusModule() {
         });
 
 
-        // Note - this is INVALID input.  The function is SUPPOSED to fail.
-        request.level = "tract";
-        request.sublevel = false;
-        request.year = 2007;
-        request.api = "ewks";
-        request.variables = [
-            "EMP",
-            "ESTAB"
-        ];
-        asyncTestsRunning++; asyncTestList.push("GEORequest2");
-        census.GEORequest(request, function (response) {
-            console.log("Census: GEORequest Complete");
-            asyncTestsRunning--; removeAsyncTest("GEORequest2");
-            if(response != false){
-                failTest(moduleName, "GEORequest", "Function returned data with invalid geographic specification.");
-
-            }
-            updateStatusDisplay();
-
-        });
 
 
 
